@@ -46,3 +46,9 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Local report scripts & screenshots
+fill_praktikum6.py
+export_p6_pdf.ps1
+screenshots/
+screenshots_p6/

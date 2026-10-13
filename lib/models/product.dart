@@ -1,24 +1,23 @@
+// ============================================================================
+// PRAKTIKUM PEMROGRAMAN MOBILE - PERTEMUAN 2 & 3
+// MODEL     : Product
+// DESKRIPSI : Class model produk beserta data dummy dan fungsi utilitas.
+// ============================================================================
+
 // ignore_for_file: avoid_print
 
 // ============================================================================
-// PRAKTIKUM PEMROGRAMAN MOBILE - PERTEMUAN 2
-// APLIKASI   : TOKOKITA
-// MATERI     : DART OOP, NULL SAFETY, INHERITANCE & FUNCTIONS
+// LANGKAH 5 & TUGAS MANDIRI 1: MODEL DATA & OOP (CLASS & NULL SAFETY)
 // ============================================================================
 
-// ============================================================================
-// 1. MODEL DATA & CLASS PRODUCT (TUGAS MANDIRI 1 & NULL SAFETY)
-// ============================================================================
-
-/// Model data utama untuk produk di aplikasi TokoKita.
 class Product {
   final String id;
   final String name;
   final double price;
   final String imageUrl;
   final String category;
-  int stock; // Mutable (tanpa final): dapat diperbarui saat stok berubah
-  final String? description; // Nullable (String?): bersifat opsional
+  int stock;
+  final String? description; // Nullable: boleh null jika tidak diisi
 
   Product({
     required this.id,
@@ -27,13 +26,10 @@ class Product {
     required this.imageUrl,
     required this.category,
     required this.stock,
-    this.description,
+    this.description, // Optional parameter
   });
 
-  /// Method getStatusStok(): Mengecek ketersediaan stok produk
-  /// - stock <= 0 : 'Habis'
-  /// - stock <= 5 : 'Stok Terbatas'
-  /// - selain itu : 'Tersedia'
+  // Tugas Mandiri 1: Method tambahan untuk cek status stok
   String getStatusStok() {
     if (stock <= 0) {
       return 'Habis';
@@ -44,25 +40,19 @@ class Product {
     }
   }
 
-  /// Method untuk menampilkan ringkasan informasi produk ke konsol
   void tampilkanInfo() {
-    print('[$category] $name (ID: $id)');
-    print('  Harga     : ${formatRupiah(price)}');
-    print('  Stok      : $stock unit (Status: ${getStatusStok()})');
-    print('  Gambar    : $imageUrl');
-    if (description != null && description!.isNotEmpty) {
-      print('  Deskripsi : $description');
+    print(
+      '[$category] $name - Rp ${price.toStringAsFixed(0)} (Stok: $stock | Status: ${getStatusStok()})',
+    );
+    if (description != null) {
+      print('  Deskripsi: $description');
     }
   }
 }
 
-// ============================================================================
-// 2. INHERITANCE (CLASS DISCOUNTEDPRODUCT)
-// ============================================================================
-
-/// Subclass dari Product untuk produk yang memiliki potongan harga (diskon).
+// Langkah 5: Inheritance
 class DiscountedProduct extends Product {
-  final double discountPercent; // Persentase diskon (misal: 20.0 untuk 20%)
+  final double discountPercent; // Contoh: 10.0 untuk 10%
 
   DiscountedProduct({
     required super.id,
@@ -75,43 +65,34 @@ class DiscountedProduct extends Product {
     required this.discountPercent,
   });
 
-  /// Getter untuk menghitung harga bersih setelah potongan diskon
-  double get finalPrice =>
-      hitungHargaSetelahDiskon(price, persenDiskon: discountPercent);
+  // Method untuk menghitung harga setelah diskon
+  double get finalPrice => price - (price * (discountPercent / 100));
 
   @override
   void tampilkanInfo() {
+    print('[$category - PROMO DISKON ${discountPercent.toInt()}%] $name');
     print(
-      '[$category - PROMO DISKON ${discountPercent.toInt()}%] $name (ID: $id)',
+      '  Harga Asli: Rp ${price.toStringAsFixed(0)} -> Harga Diskon: Rp ${finalPrice.toStringAsFixed(0)} (Stok: $stock)',
     );
-    print('  Harga Asli   : ${formatRupiah(price)}');
-    print(
-      '  Harga Diskon : ${formatRupiah(finalPrice)} (Hemat: ${formatRupiah(price - finalPrice)})',
-    );
-    print('  Stok         : $stock unit (Status: ${getStatusStok()})');
-    print('  Gambar       : $imageUrl');
-    if (description != null && description!.isNotEmpty) {
-      print('  Deskripsi    : $description');
-    }
   }
 }
 
 // ============================================================================
-// 3. HELPER FUNCTIONS (TUGAS MANDIRI 3)
+// LANGKAH 4 & TUGAS MANDIRI 3: FUNCTIONS
 // ============================================================================
 
-/// Arrow function untuk memformat angka nominal menjadi representasi Rupiah
+// Arrow function untuk format mata uang
 String formatRupiah(double nominal) => 'Rp ${nominal.toStringAsFixed(0)}';
 
-/// Function dengan named optional parameter untuk menghitung harga setelah diskon
+// Function dengan named & optional parameter
 double hitungHargaSetelahDiskon(double harga, {double persenDiskon = 0.0}) {
   return harga - (harga * (persenDiskon / 100));
 }
 
-/// Function untuk menghitung total nilai belanja dari list produk
+// Tugas Mandiri 3: Function hitung total belanja dari List<Product>
 double hitungTotalBelanja(List<Product> keranjang) {
   double total = 0.0;
-  for (final item in keranjang) {
+  for (var item in keranjang) {
     if (item is DiscountedProduct) {
       total += item.finalPrice;
     } else {
@@ -122,218 +103,197 @@ double hitungTotalBelanja(List<Product> keranjang) {
 }
 
 // ============================================================================
-// 4. DUMMY DATA (TUGAS MANDIRI 2: MINIMAL 8 PRODUK BERVARIASI)
+// TUGAS MANDIRI 2: DATA DUMMY PRODUK (top-level, dapat diakses dari main.dart)
 // ============================================================================
 
+/// Daftar produk dummy yang digunakan sebagai sumber data katalog (20 produk).
 final List<Product> dummyProducts = [
-  Product(
+  DiscountedProduct(
     id: 'P01',
-    name: 'Laptop Gaming ASUS ROG',
-    price: 18500000.0,
-    imageUrl: 'assets/laptop_rog.png',
+    name: 'Laptop Ultrabook 14 Pro',
+    price: 13500000,
+    imageUrl: 'assets/laptop.png',
     category: 'Elektronik',
-    stock: 8, // Stok Tersedia (> 5)
-    description: 'Laptop bertenaga tinggi untuk coding dan multitasking.',
+    stock: 8, // Tersedia
+    description: 'Intel Core i7 Gen 13, RAM 16GB, SSD 512GB NVMe ringkas dan elegan.',
+    discountPercent: 10,
   ),
   Product(
     id: 'P02',
     name: 'Mouse Wireless Silent Click',
-    price: 150000.0,
-    imageUrl: 'assets/mouse_wireless.png',
+    price: 175000,
+    imageUrl: 'assets/mouse.png',
     category: 'Elektronik',
-    stock: 3, // Stok Terbatas (1 - 5)
-    description: 'Konektivitas dual mode Bluetooth & 2.4GHz USB Dongle.',
+    stock: 4, // Stok Terbatas
+    description: 'Dual-mode Bluetooth 5.0 dan 2.4GHz USB receiver hemat daya.',
   ),
   Product(
     id: 'P03',
-    name: 'Mechanical Keyboard RGB',
-    price: 450000.0,
-    imageUrl: 'assets/keyboard_rgb.png',
+    name: 'Mechanical Gaming Keyboard RGB',
+    price: 520000,
+    imageUrl: 'assets/keyboard.png',
     category: 'Elektronik',
-    stock: 0, // Stok Habis (<= 0)
-    description: null, // Nullable parameter tanpa deskripsi
+    stock: 0, // Habis
+    description: 'Blue switch tactile clicky dengan lampu backlit RGB dinamis.',
   ),
-  Product(
+  DiscountedProduct(
     id: 'P04',
-    name: 'Kaos Polos Cotton Combed 30s',
-    price: 65000.0,
-    imageUrl: 'assets/kaos_cotton.png',
-    category: 'Fashion',
-    stock: 25, // Stok Tersedia
-    description: 'Bahan katun adem dan nyaman digunakan sehari-hari.',
+    name: 'Smartwatch Fitness Tracker',
+    price: 650000,
+    imageUrl: 'assets/smartwatch.png',
+    category: 'Elektronik',
+    stock: 12, // Tersedia
+    description: 'Sensor detak jantung, SpO2, sleep tracking, dan tahan air 5 ATM.',
+    discountPercent: 15,
   ),
   Product(
     id: 'P05',
-    name: 'Kemeja Flanel Casual',
-    price: 135000.0,
-    imageUrl: 'assets/kemeja_flanel.png',
+    name: 'Kaos Polos Cotton Combed 30s',
+    price: 65000,
+    imageUrl: 'assets/kaos.png',
     category: 'Fashion',
-    stock: 4, // Stok Terbatas
-    description: null, // Nullable parameter tanpa deskripsi
+    stock: 35, // Tersedia
+    description: 'Bahan 100% combed cotton lembut, adem dan menyerap keringat.',
   ),
-  Product(
+  DiscountedProduct(
     id: 'P06',
-    name: 'Kopi Susu Gula Aren 1 Liter',
-    price: 75000.0,
-    imageUrl: 'assets/kopi_literan.png',
-    category: 'Makanan',
-    stock: 15, // Stok Tersedia
-    description:
-        'Espresso blend pilihan dengan susu segar dan gula aren murni.',
+    name: 'Kemeja Batik Modern Slim Fit',
+    price: 185000,
+    imageUrl: 'assets/kemeja.png',
+    category: 'Fashion',
+    stock: 3, // Stok Terbatas
+    description: 'Batik cap motif elegan dengan potongan slim fit modern.',
+    discountPercent: 20,
   ),
   Product(
     id: 'P07',
-    name: 'Keripik Tempe Renyah Gurih',
-    price: 18000.0,
-    imageUrl: 'assets/keripik_tempe.png',
-    category: 'Makanan',
-    stock: 50, // Stok Tersedia
-    description: null, // Nullable parameter tanpa deskripsi
+    name: 'Jaket Hoodie Fleece Premium',
+    price: 240000,
+    imageUrl: 'assets/hoodie.png',
+    category: 'Fashion',
+    stock: 0, // Habis
+    description: 'Bahan cotton fleece tebal dan hangat dengan kantong kangguru.',
   ),
   Product(
     id: 'P08',
-    name: 'Headphone Bluetooth ANC',
-    price: 320000.0,
-    imageUrl: 'assets/headphone_anc.png',
-    category: 'Elektronik',
-    stock: 2, // Stok Terbatas
-    description: 'Fitur Active Noise Cancelling untuk pengalaman audio jernih.',
+    name: 'Celana Chino Slim Fit Pria',
+    price: 160000,
+    imageUrl: 'assets/chino.png',
+    category: 'Fashion',
+    stock: 15, // Tersedia
+    description: 'Celana panjang katun stretch elastis nyaman untuk kerja & santai.',
   ),
   DiscountedProduct(
     id: 'P09',
-    name: 'Smartwatch Fitness Tracker',
-    price: 500000.0,
-    imageUrl: 'assets/smartwatch.png',
+    name: 'Kopi Arabika Gayo Specialty 250g',
+    price: 85000,
+    imageUrl: 'assets/kopi.png',
+    category: 'Makanan',
+    stock: 18, // Tersedia
+    description: 'Biji kopi pilihan roasted medium dengan notes buah dan karamel.',
+    discountPercent: 12,
+  ),
+  Product(
+    id: 'P10',
+    name: 'Keripik Singkong Pedas Manis',
+    price: 22000,
+    imageUrl: 'assets/keripik.png',
+    category: 'Makanan',
+    stock: 2, // Stok Terbatas
+    description: 'Keripik renyah berbalut bumbu cabai asli khas nusantara.',
+  ),
+  Product(
+    id: 'P11',
+    name: 'Madu Hutan Liar Murni 500ml',
+    price: 110000,
+    imageUrl: 'assets/madu.png',
+    category: 'Makanan',
+    stock: 0, // Habis
+    description: 'Madu alami murni kaya antioksidan tanpa tambahan gula pengawet.',
+  ),
+  DiscountedProduct(
+    id: 'P12',
+    name: 'Granola Cokelat Almond 400g',
+    price: 68000,
+    imageUrl: 'assets/granola.png',
+    category: 'Makanan',
+    stock: 14, // Tersedia
+    description: 'Sarapan sereal gandum panggang dengan dark chocolate dan kacang almond.',
+    discountPercent: 25,
+  ),
+  Product(
+    id: 'P13',
+    name: 'Sepatu Running Breathable',
+    price: 420000,
+    imageUrl: 'assets/sepatu.png',
+    category: 'Olahraga',
+    stock: 5, // Stok Terbatas
+    description: 'Sol busa empuk dengan sirkulasi udara mesh atas yang ringan.',
+  ),
+  DiscountedProduct(
+    id: 'P14',
+    name: 'Matras Yoga Anti-Slip TPE 6mm',
+    price: 175000,
+    imageUrl: 'assets/matras.png',
+    category: 'Olahraga',
+    stock: 9, // Tersedia
+    description: 'Bahan ramah lingkungan anti-slip dengan garis panduan postur tubuh.',
+    discountPercent: 15,
+  ),
+  Product(
+    id: 'P15',
+    name: 'Botol Minum Olahraga 1 Liter',
+    price: 48000,
+    imageUrl: 'assets/botol.png',
+    category: 'Olahraga',
+    stock: 0, // Habis
+    description: 'Botol plastik Tritan BPA-Free dengan penanda waktu minum harian.',
+  ),
+  DiscountedProduct(
+    id: 'P16',
+    name: 'Buku Pemrograman Flutter & Dart',
+    price: 125000,
+    imageUrl: 'assets/buku_flutter.png',
+    category: 'Buku',
+    stock: 16, // Tersedia
+    description: 'Panduan komprehensif membangun aplikasi mobile modern dari dasar.',
+    discountPercent: 20,
+  ),
+  Product(
+    id: 'P17',
+    name: 'Buku Filosofi Teras',
+    price: 98000,
+    imageUrl: 'assets/buku_filosofi.png',
+    category: 'Buku',
+    stock: 3, // Stok Terbatas
+    description: 'Penerapan filsafat stoisisme kuno untuk mental tangguh masa kini.',
+  ),
+  Product(
+    id: 'P18',
+    name: 'Lampu Meja LED Fleksibel',
+    price: 89000,
+    imageUrl: 'assets/lampu.png',
     category: 'Elektronik',
-    stock: 5, // Stok Terbatas dengan Diskon
-    discountPercent: 20.0,
-    description: 'Monitor detak jantung, SpO2, dan pelacak aktivitas olahraga.',
+    stock: 20, // Tersedia
+    description: '3 tingkat kecerahan dengan leher silikon fleksibel dan baterai isi ulang.',
+  ),
+  DiscountedProduct(
+    id: 'P19',
+    name: 'Tas Ransel Laptop Anti-Air',
+    price: 295000,
+    imageUrl: 'assets/ransel.png',
+    category: 'Fashion',
+    stock: 5, // Stok Terbatas
+    description: 'Kapasitas 20L dengan kompartemen laptop 15.6 inch dan port USB charger.',
+    discountPercent: 30,
+  ),
+  Product(
+    id: 'P20',
+    name: 'Earphone TWS Bluetooth 5.3',
+    price: 199000,
+    imageUrl: 'assets/tws.png',
+    category: 'Elektronik',
+    stock: 0, // Habis
+    description: 'Kualitas suara bass mendalam dengan mikrofon noise reduction jernih.',
   ),
 ];
-
-// ============================================================================
-// 5. MAIN FUNCTION (PENGUJIAN & DEMONSTRASI SELURUH FITUR)
-// ============================================================================
-
-void main() {
-  print('============================================================');
-  print('       PRAKTIKUM 2 PEMROGRAMAN MOBILE - TOKOKITA            ');
-  print('============================================================\n');
-
-  // --------------------------------------------------------------------------
-  // LANGKAH 1 s.d. 3: DASAR DART (Variabel, Operator, Control Flow)
-  // --------------------------------------------------------------------------
-  print('=== [1] PENGUJIAN VARIABEL, OPERATOR & KONDISI ===');
-  const String namaToko = 'TokoKita Official';
-  final String tanggalUji = DateTime.now().toString().split(' ')[0];
-  var totalKategori = 3;
-
-  print('Toko           : $namaToko');
-  print('Tanggal Uji    : $tanggalUji');
-  print('Total Kategori : $totalKategori (Elektronik, Fashion, Makanan)\n');
-
-  // --------------------------------------------------------------------------
-  // LANGKAH 4 & TUGAS MANDIRI 3: HELPER FUNCTIONS
-  // --------------------------------------------------------------------------
-  print('=== [2] PENGUJIAN HELPER FUNCTIONS ===');
-  double hargaUji = 200000.0;
-  double persenDiskonUji = 15.0;
-  double hargaSetelahDiskon = hitungHargaSetelahDiskon(
-    hargaUji,
-    persenDiskon: persenDiskonUji,
-  );
-
-  print('Arrow Function formatRupiah  : ${formatRupiah(hargaUji)}');
-  print('Harga Normal                 : ${formatRupiah(hargaUji)}');
-  print('Diskon                       : ${persenDiskonUji.toInt()}%');
-  print('Harga Setelah Diskon         : ${formatRupiah(hargaSetelahDiskon)}\n');
-
-  // --------------------------------------------------------------------------
-  // LANGKAH 5 & TUGAS MANDIRI 2: DUMMY DATA & getStatusStok()
-  // --------------------------------------------------------------------------
-  print('=== [3] DAFTAR KATALOG PRODUK (DUMMY DATA - MINIMAL 8 ITEM) ===');
-  print('Total item dalam katalog: ${dummyProducts.length} produk\n');
-
-  for (int i = 0; i < dummyProducts.length; i++) {
-    print('Produk #${i + 1}:');
-    dummyProducts[i].tampilkanInfo();
-    print('------------------------------------------------------------');
-  }
-
-  // --------------------------------------------------------------------------
-  // LANGKAH 5 (INHERITANCE): PENGUJIAN DISCOUNTEDPRODUCT
-  // --------------------------------------------------------------------------
-  print('\n=== [4] PENGUJIAN INHERITANCE (DiscountedProduct) ===');
-  DiscountedProduct promoSpesial = DiscountedProduct(
-    id: 'PROMO-SPESIAL-01',
-    name: 'Sepatu Running Sporty',
-    price: 750000.0,
-    imageUrl: 'assets/sepatu_sporty.png',
-    category: 'Fashion',
-    stock: 5,
-    discountPercent: 30.0,
-    description: 'Sepatu lari ringan dengan bantalan ekstra nyaman.',
-  );
-  promoSpesial.tampilkanInfo();
-
-  // --------------------------------------------------------------------------
-  // TUGAS MANDIRI 3: PENGUJIAN hitungTotalBelanja()
-  // --------------------------------------------------------------------------
-  print('\n=== [5] PENGUJIAN FUNGSI hitungTotalBelanja() ===');
-  List<Product> keranjangSimulasi = [
-    dummyProducts[0], // Laptop (Rp 18.500.000)
-    dummyProducts[1], // Mouse (Rp 150.000)
-    dummyProducts[5], // Kopi (Rp 75.000)
-    promoSpesial, // Sepatu Diskon 30% (Rp 750.000 -> Rp 525.000)
-  ];
-
-  print('Item dalam Keranjang Belanja:');
-  for (var item in keranjangSimulasi) {
-    if (item is DiscountedProduct) {
-      print(
-        '  - ${item.name} (${item.category}) : ${formatRupiah(item.finalPrice)} [Diskon ${item.discountPercent.toInt()}%]',
-      );
-    } else {
-      print(
-        '  - ${item.name} (${item.category}) : ${formatRupiah(item.price)}',
-      );
-    }
-  }
-
-  double totalKeranjang = hitungTotalBelanja(keranjangSimulasi);
-  print('\n=> Total Nilai Keranjang Belanja : ${formatRupiah(totalKeranjang)}');
-
-  double totalSeluruhKatalog = hitungTotalBelanja(dummyProducts);
-  print(
-    '=> Total Nilai Seluruh Katalog   : ${formatRupiah(totalSeluruhKatalog)}\n',
-  );
-
-  // --------------------------------------------------------------------------
-  // PENGUJIAN MUTABILITAS STOK (MUTABLE FIELD & getStatusStok)
-  // --------------------------------------------------------------------------
-  print('=== [6] PENGUJIAN PERUBAHAN STOK (MUTABLE STOCK & STATUS) ===');
-  Product produkUjiStok = Product(
-    id: 'TEST-MUTASI',
-    name: 'Powerbank Fast Charging 10000mAh',
-    price: 199000.0,
-    imageUrl: 'assets/powerbank.png',
-    category: 'Elektronik',
-    stock: 10,
-  );
-
-  print(
-    '1. Kondisi Awal      : Stok = ${produkUjiStok.stock} unit -> Status: "${produkUjiStok.getStatusStok()}"',
-  );
-  produkUjiStok.stock = 4; // Mengubah nilai properti stock (mutable)
-  print(
-    '2. Terjual 6 Unit    : Stok = ${produkUjiStok.stock} unit  -> Status: "${produkUjiStok.getStatusStok()}"',
-  );
-  produkUjiStok.stock = 0; // Mengubah nilai properti stock menjadi 0
-  print(
-    '3. Terjual Habis     : Stok = ${produkUjiStok.stock} unit  -> Status: "${produkUjiStok.getStatusStok()}"',
-  );
-
-  print('\n============================================================');
-  print('       SEMUA PENGUJIAN PRAKTIKUM BERHASIL DIJALANKAN        ');
-  print('============================================================');
-}
